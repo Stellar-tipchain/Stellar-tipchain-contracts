@@ -408,11 +408,22 @@ stellar contract invoke \
 
 ## Interacting with the Contract
 
-> 🔲 Only `init` is callable. `tip`, `get_total_tips`, and `withdraw` panic with `unimplemented!` until implemented.
+> 🔲 `withdraw` still panics with `unimplemented!`. Tipped funds stay in escrow
+> until it lands — do not deploy this to mainnet yet.
 
 ```bash
 # Initialise (one time only)
 stellar contract invoke --id <CONTRACT_ID> -- init --token <TOKEN_ADDRESS>
+
+# Tip a creator 500 units of the configured token
+stellar contract invoke --id <CONTRACT_ID> --source supporter -- tip \
+  --sender <SUPPORTER_ADDRESS> \
+  --creator <CREATOR_ADDRESS> \
+  --amount 500
+
+# Read a creator's lifetime total
+stellar contract invoke --id <CONTRACT_ID> -- get_total_tips \
+  --creator <CREATOR_ADDRESS>
 ```
 
 ---
