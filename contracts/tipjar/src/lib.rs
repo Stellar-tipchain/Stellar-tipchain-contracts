@@ -54,6 +54,13 @@ fn read_balance(env: &Env, creator: &Address) -> i128 {
         .unwrap_or(0)
 }
 
+/// Overwrites the withdrawable balance for `creator`.
+fn write_balance(env: &Env, creator: &Address, amount: i128) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::CreatorBalance(creator.clone()), &amount);
+}
+
 #[contract]
 pub struct TipJar;
 
