@@ -397,6 +397,36 @@ mod tests {
         client.tip(&supporter, &creator, &100);
     }
 
+    #[test]
+    fn test_tip_emits_a_tip_event() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &640);
+
+        // The token contract emits its own transfer event, so select ours.
+        let published = env.events().all();
+        let tip_event = published
+            .iter()
+            .filter(|event| event.0 == contract_id)
+            .last()
+            .expect("tip event was published");
+
+        assert_eq!(
+            tip_event.1,
+            vec![
+                &env,
+                symbol_short!("tip").into_val(&env),
+                creator.into_val(&env),
+            ],
+        );
+        assert_eq!(tip_event.2, (supporter, 640_i128).into_val(&env));
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
