@@ -180,16 +180,45 @@ stellar contract invoke --id <CONTRACT_ID> -- init --token <TOKEN_ADDRESS>
 
 ---
 
-### `tip(sender: Address, creator: Address, amount: i128)` 🔲 TODO
+### `tip(sender: Address, creator: Address, amount: i128)` ✅ Implemented
 
 Moves `amount` tokens from `sender` into the contract's escrow and credits the creator's balances.
 
-Planned behaviour:
 - `sender.require_auth()` — the sender's wallet must sign
 - Panics `"amount must be positive"` if `amount <= 0`
+- Panics `"not initialised"` if `init` has not been called
 - Calls `token::Client::transfer(sender → contract, amount)`
 - Increments `CreatorBalance[creator]` and `CreatorTotal[creator]` in persistent storage
+- Extends the TTL of both persistent entries
 - Emits `("tip", creator)` event with data `(sender, amount)`
+
+```rust
+pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
+    sender.require_auth();
+
+    if amount <= 0 {
+        panic!("amount must be positive");
+    }
+
+    let token = read_token(&env);
+    token::Client::new(&env, &token).transfer(
+        &sender,
+        &env.current_contract_address(),
+        &amount,
+    );
+
+    let balance = read_balance(&env, &creator) + amount;
+    write_balance(&env, &creator, balance);
+
+    let total = read_total(&env, &creator) + amount;
+    write_total(&env, &creator, total);
+
+    extend_creator_ttl(&env, &creator);
+
+    env.events()
+        .publish((symbol_short!("tip"), creator), (sender, amount));
+}
+```
 
 ```bash
 stellar contract invoke --id <CONTRACT_ID> -- tip \
