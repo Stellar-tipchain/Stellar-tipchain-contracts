@@ -132,7 +132,10 @@ impl TipJar {
             &amount,
         );
 
-        let _ = &creator;
+        // Credit the creator's withdrawable balance.
+        let balance = read_balance(&env, &creator) + amount;
+        write_balance(&env, &creator, balance);
+
         unimplemented!("tip: not yet implemented")
     }
 
