@@ -12,6 +12,8 @@
   withdrawable balance and the all-time total
 - `get_total_tips(creator)` — reads the all-time counter, returning `0` for an
   address that has never been tipped
+- `("tip", creator)` event carrying `(sender, amount)`
+- Persistent TTL extension on both creator entries whenever a tip is received
 
 ### Pending
 - `tip(sender, creator, amount)` — token escrow transfer and balance tracking
