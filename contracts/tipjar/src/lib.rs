@@ -9,7 +9,7 @@
 //! [`TipJar::withdraw`] to release their balance. There is no admin role — once
 //! [`TipJar::init`] has stored the token address, the contract is autonomous.
 
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, token, Address, Env};
 
 /// Ledgers closed in roughly one day at the ~5 second Stellar ledger cadence.
 const LEDGERS_PER_DAY: u32 = 17_280;
@@ -143,7 +143,8 @@ impl TipJar {
         // Both entries now exist, so they are safe to bump.
         extend_creator_ttl(&env, &creator);
 
-        unimplemented!("tip: not yet implemented")
+        env.events()
+            .publish((symbol_short!("tip"), creator), (sender, amount));
     }
 
     /// TODO: Return cumulative total tips received by `creator`.
