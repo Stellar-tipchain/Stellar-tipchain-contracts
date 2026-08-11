@@ -109,12 +109,22 @@ impl TipJar {
         env.storage().instance().set(&DataKey::Token, &token);
     }
 
-    /// TODO: Transfer `amount` tokens from `sender` into escrow for `creator`.
-    /// - Require sender auth
-    /// - Validate amount > 0
-    /// - Transfer tokens sender → contract
-    /// - Update CreatorBalance and CreatorTotal
-    /// - Emit ("tip", creator) event
+    /// Tips `creator` with `amount` tokens, held in escrow until withdrawal.
+    ///
+    /// The tokens move from `sender` into the contract's own account. Both the
+    /// creator's withdrawable balance and their all-time total are incremented,
+    /// and a `("tip", creator)` event carrying `(sender, amount)` is emitted.
+    ///
+    /// # Panics
+    ///
+    /// - `"amount must be positive"` if `amount <= 0`.
+    /// - `"not initialised"` if `init` has not been called.
+    /// - Whatever the token contract panics with if `sender` lacks the balance.
+    ///
+    /// # Authorisation
+    ///
+    /// `sender` must sign the transaction. No authorisation is required from
+    /// `creator` — anyone may be tipped without opting in.
     pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
         // The supporter's wallet must sign: tokens are about to leave it.
         sender.require_auth();
