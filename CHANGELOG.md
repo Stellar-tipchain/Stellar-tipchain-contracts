@@ -14,6 +14,9 @@
   address that has never been tipped
 - `("tip", creator)` event carrying `(sender, amount)`
 - Persistent TTL extension on both creator entries whenever a tip is received
+- Unit tests grew from 2 to 16, covering accumulation, multi-supporter and
+  multi-creator isolation, escrow custody, supporter debit, event payload,
+  authorisation, both rejection paths, and the uninitialised guard
 
 ### Pending
 - `tip(sender, creator, amount)` — token escrow transfer and balance tracking
