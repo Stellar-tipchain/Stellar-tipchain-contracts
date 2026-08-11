@@ -2,6 +2,10 @@
 name = "tipjar"
 version = "0.1.0"
 edition = "2021"
+description = "Soroban escrow contract for tipping Stellar creators with any SEP-41 token"
+license = "MIT"
+repository = "https://github.com/Ejirowebfi/Stellar-tipchain-contracts"
+readme = "../../README.md"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
