@@ -209,6 +209,16 @@ mod tests {
         (env, contract_id, token_id, token_admin)
     }
 
+    /// Generates an address holding `amount` of the test token.
+    fn funded_supporter(env: &Env, token_id: &Address, admin: &Address, amount: i128) -> Address {
+        let supporter = Address::generate(env);
+        StellarAssetClient::new(env, token_id)
+            .mock_all_auths()
+            .mint(&supporter, &amount);
+        let _ = admin;
+        supporter
+    }
+
     #[test]
     fn test_init() {
         let (env, contract_id, token_id, _admin) = setup();
