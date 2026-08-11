@@ -351,13 +351,27 @@ cargo test -p tipjar
 
 Tests run in Soroban's in-process test environment — no network or CLI required.
 
+16 tests, all passing.
+
 | Test | What it covers | Status |
 |---|---|---|
 | `test_init` | `init()` stores token address without panic | ✅ Passes |
 | `test_init_twice_panics` | Second `init()` call panics with `"already initialised"` | ✅ Passes |
-| `test_tip_and_totals` | Tips accumulate in both balance and total | 🔲 TODO |
+| `test_tip_credits_the_creator_total` | A tip increments the all-time counter | ✅ Passes |
+| `test_tip_credits_the_withdrawable_balance` | A tip increments the escrow balance | ✅ Passes |
+| `test_tips_accumulate_across_calls` | Repeated tips add up instead of overwriting | ✅ Passes |
+| `test_tips_from_multiple_supporters_aggregate` | Different senders credit one creator | ✅ Passes |
+| `test_creator_balances_are_isolated` | One creator's tips never reach another | ✅ Passes |
+| `test_tipped_funds_land_in_contract_escrow` | Tokens sit with the contract, not the creator | ✅ Passes |
+| `test_tip_debits_the_supporter` | The sender pays exactly the tip amount | ✅ Passes |
+| `test_zero_tip_amount_panics` | `amount == 0` panics with `"amount must be positive"` | ✅ Passes |
+| `test_negative_tip_amount_panics` | `amount < 0` panics with `"amount must be positive"` | ✅ Passes |
+| `test_get_total_tips_is_zero_for_unknown_creator` | Untouched addresses read as `0` | ✅ Passes |
+| `test_tip_before_init_panics` | Tipping an unconfigured jar panics `"not initialised"` | ✅ Passes |
+| `test_tip_emits_a_tip_event` | Event topics and payload match the spec | ✅ Passes |
+| `test_tip_requires_supporter_authorisation` | `require_auth` is recorded for the sender | ✅ Passes |
+| `test_withdraw_is_not_implemented_yet` | `withdraw` fails loudly while unimplemented | ✅ Passes |
 | `test_withdraw` | Creator receives correct token amount after withdrawal | 🔲 TODO |
-| `test_invalid_tip_amount` | Zero/negative tip amount panics correctly | 🔲 TODO |
 
 ---
 
