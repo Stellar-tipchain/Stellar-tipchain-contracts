@@ -1,4 +1,14 @@
 #![no_std]
+//! # TipJar
+//!
+//! A non-custodial tipping escrow for Stellar creators.
+//!
+//! Supporters call [`TipJar::tip`] to move tokens into the contract's own
+//! account. The contract credits two independent per-creator counters: a
+//! withdrawable balance and an all-time total. Creators call
+//! [`TipJar::withdraw`] to release their balance. There is no admin role — once
+//! [`TipJar::init`] has stored the token address, the contract is autonomous.
+
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
 
 #[contracttype]
