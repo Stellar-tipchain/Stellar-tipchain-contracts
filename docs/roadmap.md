@@ -2,19 +2,16 @@
 
 Percentages track the nine features in the README progress tracker.
 
-## Shipped — 30%
+## Shipped — 60%
 
 - Workspace and crate scaffolding
 - `DataKey` storage enum
 - `init(token)` with a double-init guard
-- `test_init`, `test_init_twice_panics`
-
-## In progress — target 60%
-
 - `tip(sender, creator, amount)` escrow transfer and dual balance update
 - `get_total_tips(creator)`
-- `tip` event
-- Unit tests covering tipping, accumulation, isolation and rejection paths
+- `tip` event and persistent TTL extension
+- 16 unit tests covering tipping, accumulation, isolation, custody, events,
+  authorisation and every rejection path
 
 ## Next — target 100%
 
