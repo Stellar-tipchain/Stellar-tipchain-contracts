@@ -27,15 +27,15 @@ pub enum DataKey {
     CreatorTotal(Address),
 }
 
-/// Reads the token address stored by [`TipJar::init`].
-///
-/// Panics with `"not initialised"` when `init` has never been called, so a
-/// mis-ordered deployment fails loudly instead of transferring nothing.
 /// Whether [`TipJar::init`] has already stored a token address.
 fn is_initialised(env: &Env) -> bool {
     env.storage().instance().has(&DataKey::Token)
 }
 
+/// Reads the token address stored by [`TipJar::init`].
+///
+/// Panics with `"not initialised"` when `init` has never been called, so a
+/// mis-ordered deployment fails loudly instead of transferring nothing.
 fn read_token(env: &Env) -> Address {
     match env.storage().instance().get(&DataKey::Token) {
         Some(token) => token,
