@@ -353,9 +353,16 @@ stellar keys generate default --network testnet --fund
 
 ```bash
 cargo build -p tipjar --target wasm32v1-none --release
+# or: make build
 ```
 
-Output: `target/wasm32v1-none/release/tipjar.wasm`
+Output: `target/wasm32v1-none/release/tipjar.wasm` (~10 KB at the current
+feature set, built with the size-optimised `[profile.release]` in the workspace
+manifest).
+
+`Cargo.lock` is committed so the same source always produces the same binary;
+see [docs/dependencies.md](docs/dependencies.md) for the one deliberate version
+pin.
 
 ---
 
@@ -363,9 +370,12 @@ Output: `target/wasm32v1-none/release/tipjar.wasm`
 
 ```bash
 cargo test -p tipjar
+# or: make test        # and `make check` for fmt + clippy + tests
 ```
 
 Tests run in Soroban's in-process test environment — no network or CLI required.
+Conventions and the harness are described in [docs/testing.md](docs/testing.md);
+the rest of the design notes are indexed in [docs/](docs/README.md).
 
 16 tests, all passing.
 
