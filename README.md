@@ -15,8 +15,8 @@ A Rust + Soroban smart contract for a Stellar-based tipping application. Support
 | 4 | `tip(sender, creator, amount)` — escrow transfer + storage update | ✅ Done |
 | 5 | `get_total_tips(creator)` — read cumulative total | ✅ Done |
 | 6 | `withdraw(creator)` — release escrowed balance | 🔲 TODO |
-| 7 | On-chain events for tip and withdraw | 🔲 TODO |
-| 8 | Full unit test suite | 🔲 TODO |
+| 7 | On-chain events for tip and withdraw | 🟨 `tip` done, `withdraw` pending |
+| 8 | Full unit test suite | 🟨 16 tests; withdrawal coverage pending |
 | 9 | Testnet deploy script | 🔲 TODO |
 
 ---
