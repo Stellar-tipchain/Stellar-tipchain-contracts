@@ -10,6 +10,8 @@
 - `tip(sender, creator, amount)` — requires supporter auth, rejects non-positive
   amounts, transfers tokens into contract escrow, and credits both the
   withdrawable balance and the all-time total
+- `get_total_tips(creator)` — reads the all-time counter, returning `0` for an
+  address that has never been tipped
 
 ### Pending
 - `tip(sender, creator, amount)` — token escrow transfer and balance tracking
