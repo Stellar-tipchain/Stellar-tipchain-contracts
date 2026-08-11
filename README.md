@@ -92,7 +92,7 @@ Key design properties:
    - Emits event: topic=("withdraw", creator), data=amount
    - CreatorTotal[creator] is NOT changed — historical record preserved
         ↓
-5. get_total_tips(creator) → i128                        ← 🔲 TODO
+5. get_total_tips(creator) → i128                        ← ✅ Implemented
    - Read-only, no auth required
    - Returns CreatorTotal[creator] from persistent storage
    - Returns 0 if creator has never been tipped
