@@ -18,6 +18,13 @@
   multi-creator isolation, escrow custody, supporter debit, event payload,
   authorisation, both rejection paths, and the uninitialised guard
 
+### Tooling and docs
+- CI workflow: WASM build, unit tests, rustfmt and clippy gates
+- `Makefile`, `rustfmt.toml`, `.editorconfig`, `.gitattributes`, `.gitignore`
+- Committed `Cargo.lock` with `ed25519-dalek` pinned to 2.1.1
+- MIT `LICENSE`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, issue and PR templates
+- `docs/` — architecture, storage model, events, testing, dependencies, roadmap
+
 ### Pending
 - `tip(sender, creator, amount)` — token escrow transfer and balance tracking
 - `get_total_tips(creator)` — read cumulative historical total
