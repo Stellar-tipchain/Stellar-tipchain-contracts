@@ -39,3 +39,23 @@ on the creator's own signature.
 - No admin key exists after `init`, so the deployer cannot rug the escrow.
 - Storage entries must be kept alive (TTL bumped) or the ledger may archive
   them; the contract extends TTLs on write.
+
+## Implemented call path
+
+`tip` runs in a fixed order, and every step must succeed or the whole
+transaction reverts:
+
+```
+sender.require_auth()
+  → reject amount <= 0
+  → read_token()
+  → token.transfer(sender → contract)
+  → write_balance(read_balance + amount)
+  → write_total(read_total + amount)
+  → extend_creator_ttl()
+  → publish ("tip", creator)
+```
+
+Authorisation comes first so an unsigned call cannot even reach the storage
+reads, and the event is published last so it is only ever observed for a tip
+that actually moved funds.
