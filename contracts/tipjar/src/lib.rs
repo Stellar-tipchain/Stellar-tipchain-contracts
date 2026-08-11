@@ -445,6 +445,20 @@ mod tests {
         );
     }
 
-    // TODO: test_withdraw       — blocked on withdraw() implementation
-    // TODO: test_invalid_tip_amount — blocked on tip() implementation
+    #[test]
+    #[should_panic(expected = "not yet implemented")]
+    fn test_withdraw_is_not_implemented_yet() {
+        let (env, contract_id, token_id, _admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let creator = Address::generate(&env);
+
+        // Pins the current 60% state: withdraw must fail loudly, never silently
+        // succeed while funds stay in escrow.
+        client.withdraw(&creator);
+    }
+
+    // TODO: test_withdraw — replace test_withdraw_is_not_implemented_yet once
+    // withdraw() releases escrowed funds.
 }
