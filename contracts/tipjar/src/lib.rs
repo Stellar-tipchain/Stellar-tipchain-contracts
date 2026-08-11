@@ -9,7 +9,7 @@
 //! [`TipJar::withdraw`] to release their balance. There is no admin role — once
 //! [`TipJar::init`] has stored the token address, the contract is autonomous.
 
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env};
 
 /// Ledgers closed in roughly one day at the ~5 second Stellar ledger cadence.
 const LEDGERS_PER_DAY: u32 = 17_280;
@@ -125,7 +125,14 @@ impl TipJar {
 
         let token = read_token(&env);
 
-        let _ = (&creator, &token);
+        // Move the tokens into the contract's own account — the escrow.
+        token::Client::new(&env, &token).transfer(
+            &sender,
+            &env.current_contract_address(),
+            &amount,
+        );
+
+        let _ = &creator;
         unimplemented!("tip: not yet implemented")
     }
 
