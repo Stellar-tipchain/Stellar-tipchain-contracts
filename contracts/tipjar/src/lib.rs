@@ -315,6 +315,23 @@ mod tests {
         assert_eq!(client.get_total_tips(&bob), 0);
     }
 
+    #[test]
+    fn test_tipped_funds_land_in_contract_escrow() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &1_200);
+
+        let token = TokenClient::new(&env, &token_id);
+        assert_eq!(token.balance(&contract_id), 1_200);
+        // The creator is credited in storage, not paid out yet.
+        assert_eq!(token.balance(&creator), 0);
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
