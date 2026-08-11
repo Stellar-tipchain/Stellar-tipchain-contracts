@@ -26,6 +26,8 @@ jobs:
         run: rustup target add wasm32v1-none
       - name: Build contract
         run: cargo build -p tipjar --target wasm32v1-none --release
+      - name: Report WASM size
+        run: ls -lh target/wasm32v1-none/release/tipjar.wasm
 
   test:
     name: Unit tests
