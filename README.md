@@ -12,8 +12,8 @@ A Rust + Soroban smart contract for a Stellar-based tipping application. Support
 | 1 | Workspace & crate scaffolding | ✅ Done |
 | 2 | `DataKey` storage enum | ✅ Done |
 | 3 | `init(token)` — one-time token config | ✅ Done |
-| 4 | `tip(sender, creator, amount)` — escrow transfer + storage update | 🔲 TODO |
-| 5 | `get_total_tips(creator)` — read cumulative total | 🔲 TODO |
+| 4 | `tip(sender, creator, amount)` — escrow transfer + storage update | ✅ Done |
+| 5 | `get_total_tips(creator)` — read cumulative total | ✅ Done |
 | 6 | `withdraw(creator)` — release escrowed balance | 🔲 TODO |
 | 7 | On-chain events for tip and withdraw | 🔲 TODO |
 | 8 | Full unit test suite | 🔲 TODO |
