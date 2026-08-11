@@ -409,22 +409,24 @@ mod tests {
         client.tip(&supporter, &creator, &640);
 
         // The token contract emits its own transfer event, so select ours.
-        let published = env.events().all();
-        let tip_event = published
-            .iter()
-            .filter(|event| event.0 == contract_id)
-            .last()
-            .expect("tip event was published");
+        let mut ours = vec![&env];
+        for event in env.events().all().iter() {
+            if event.0 == contract_id {
+                ours.push_back(event);
+            }
+        }
 
         assert_eq!(
-            tip_event.1,
+            ours,
             vec![
                 &env,
-                symbol_short!("tip").into_val(&env),
-                creator.into_val(&env),
+                (
+                    contract_id.clone(),
+                    (symbol_short!("tip"), creator).into_val(&env),
+                    (supporter, 640_i128).into_val(&env),
+                ),
             ],
         );
-        assert_eq!(tip_event.2, (supporter, 640_i128).into_val(&env));
     }
 
     #[test]
