@@ -31,6 +31,11 @@ pub enum DataKey {
 ///
 /// Panics with `"not initialised"` when `init` has never been called, so a
 /// mis-ordered deployment fails loudly instead of transferring nothing.
+/// Whether [`TipJar::init`] has already stored a token address.
+fn is_initialised(env: &Env) -> bool {
+    env.storage().instance().has(&DataKey::Token)
+}
+
 fn read_token(env: &Env) -> Address {
     match env.storage().instance().get(&DataKey::Token) {
         Some(token) => token,
@@ -45,7 +50,7 @@ pub struct TipJar;
 impl TipJar {
     /// One-time initialisation: store the token contract address.
     pub fn init(env: Env, token: Address) {
-        if env.storage().instance().has(&DataKey::Token) {
+        if is_initialised(&env) {
             panic!("already initialised");
         }
         env.storage().instance().set(&DataKey::Token, &token);
