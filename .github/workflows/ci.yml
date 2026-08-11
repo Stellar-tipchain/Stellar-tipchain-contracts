@@ -18,3 +18,11 @@ jobs:
         run: rustup target add wasm32v1-none
       - name: Build contract
         run: cargo build -p tipjar --target wasm32v1-none --release
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: cargo test -p tipjar
