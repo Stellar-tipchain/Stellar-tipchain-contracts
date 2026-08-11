@@ -71,6 +71,13 @@ fn read_total(env: &Env, creator: &Address) -> i128 {
         .unwrap_or(0)
 }
 
+/// Overwrites the all-time total for `creator`.
+fn write_total(env: &Env, creator: &Address, amount: i128) {
+    env.storage()
+        .persistent()
+        .set(&DataKey::CreatorTotal(creator.clone()), &amount);
+}
+
 #[contract]
 pub struct TipJar;
 
