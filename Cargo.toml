@@ -4,3 +4,14 @@ members = ["contracts/tipjar"]
 
 [workspace.dependencies]
 soroban-sdk = { version = "22.0.8" }
+
+# Size-optimised profile for the on-chain WASM binary.
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
