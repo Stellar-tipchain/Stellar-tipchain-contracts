@@ -275,6 +275,13 @@ stellar contract invoke --id <CONTRACT_ID> -- withdraw \
 
 `i128` is used for token amounts because Stellar token balances are represented as signed 128-bit integers in the Soroban token interface.
 
+### Entry lifetime
+
+Both persistent entries are bumped on every tip: when either falls within
+30 days of expiry it is extended to live a further 60 days. The two counters
+are always bumped together so they can never expire independently and leave a
+creator with a total but no balance.
+
 ---
 
 ## Events
