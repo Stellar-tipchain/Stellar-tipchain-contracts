@@ -140,6 +140,9 @@ impl TipJar {
         let total = read_total(&env, &creator) + amount;
         write_total(&env, &creator, total);
 
+        // Both entries now exist, so they are safe to bump.
+        extend_creator_ttl(&env, &creator);
+
         unimplemented!("tip: not yet implemented")
     }
 
