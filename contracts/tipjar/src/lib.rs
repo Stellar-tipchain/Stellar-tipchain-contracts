@@ -267,6 +267,22 @@ mod tests {
         assert_eq!(balance, 750);
     }
 
+    #[test]
+    fn test_tips_accumulate_across_calls() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &100);
+        client.tip(&supporter, &creator, &250);
+        client.tip(&supporter, &creator, &50);
+
+        assert_eq!(client.get_total_tips(&creator), 400);
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
