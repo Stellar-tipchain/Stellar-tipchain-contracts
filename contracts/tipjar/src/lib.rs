@@ -123,7 +123,9 @@ impl TipJar {
             panic!("amount must be positive");
         }
 
-        let _ = (&env, &creator);
+        let token = read_token(&env);
+
+        let _ = (&creator, &token);
         unimplemented!("tip: not yet implemented")
     }
 
