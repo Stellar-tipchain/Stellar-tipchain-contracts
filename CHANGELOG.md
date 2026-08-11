@@ -7,6 +7,9 @@
 - `DataKey` storage enum (`Token`, `CreatorBalance`, `CreatorTotal`)
 - `init(token)` — one-time token address configuration with double-init guard
 - Unit tests: `test_init`, `test_init_twice_panics`
+- `tip(sender, creator, amount)` — requires supporter auth, rejects non-positive
+  amounts, transfers tokens into contract escrow, and credits both the
+  withdrawable balance and the all-time total
 
 ### Pending
 - `tip(sender, creator, amount)` — token escrow transfer and balance tracking
