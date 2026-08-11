@@ -158,8 +158,8 @@ impl TipJar {
     }
 
     /// TODO: Return cumulative total tips received by `creator`.
-    pub fn get_total_tips(_env: Env, _creator: Address) -> i128 {
-        unimplemented!("get_total_tips: not yet implemented")
+    pub fn get_total_tips(env: Env, creator: Address) -> i128 {
+        read_total(&env, &creator)
     }
 
     /// TODO: Transfer creator's escrowed balance to their wallet.
