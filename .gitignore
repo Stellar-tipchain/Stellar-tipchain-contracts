@@ -1,0 +1,19 @@
+# Rust build artifacts
+/target
+**/target/
+**/*.rs.bk
+
+# Local Stellar/Soroban state
+.soroban/
+.stellar/
+deployed_contract_id.txt
+
+# Environment files
+.env
+.env.local
+
+# Editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+*.swp
