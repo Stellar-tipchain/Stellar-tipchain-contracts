@@ -73,7 +73,7 @@ Key design properties:
    - Can only be called once; panics with "already initialised" on repeat calls
    - No auth required — first caller wins
         ↓
-3. tip(sender, creator, amount)                          ← 🔲 TODO
+3. tip(sender, creator, amount)                          ← ✅ Implemented
    - sender must sign the transaction (require_auth)
    - Validates amount > 0, panics with "amount must be positive" otherwise
    - Calls token.transfer(sender → contract, amount)
@@ -81,6 +81,7 @@ Key design properties:
    - Reads CreatorTotal[creator] from persistent storage (default 0)
    - Writes CreatorBalance[creator] += amount
    - Writes CreatorTotal[creator]   += amount
+   - Extends the TTL of both persistent entries
    - Emits event: topic=("tip", creator), data=(sender, amount)
         ↓
 4. withdraw(creator)                                     ← 🔲 TODO
