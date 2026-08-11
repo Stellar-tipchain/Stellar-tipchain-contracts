@@ -189,10 +189,13 @@ impl TipJar {
 mod tests {
     use super::*;
     use soroban_sdk::{
-        testutils::Address as _,
-        token::StellarAssetClient,
-        Address, Env,
+        testutils::{Address as _, Events},
+        token::{Client as TokenClient, StellarAssetClient},
+        vec, Address, Env, IntoVal,
     };
+
+    /// Starting token balance handed to every supporter in the tests.
+    const SUPPORTER_FUNDS: i128 = 10_000;
 
     /// Registers the contract plus a fresh Stellar asset contract to tip with.
     ///
