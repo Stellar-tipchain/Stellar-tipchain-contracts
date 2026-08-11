@@ -136,6 +136,10 @@ impl TipJar {
         let balance = read_balance(&env, &creator) + amount;
         write_balance(&env, &creator, balance);
 
+        // Credit the all-time counter, which withdrawals never reset.
+        let total = read_total(&env, &creator) + amount;
+        write_total(&env, &creator, total);
+
         unimplemented!("tip: not yet implemented")
     }
 
