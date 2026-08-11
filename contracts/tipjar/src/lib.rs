@@ -283,6 +283,22 @@ mod tests {
         assert_eq!(client.get_total_tips(&creator), 400);
     }
 
+    #[test]
+    fn test_tips_from_multiple_supporters_aggregate() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let first = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let second = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&first, &creator, &300);
+        client.tip(&second, &creator, &200);
+
+        assert_eq!(client.get_total_tips(&creator), 500);
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
