@@ -61,6 +61,16 @@ fn write_balance(env: &Env, creator: &Address, amount: i128) {
         .set(&DataKey::CreatorBalance(creator.clone()), &amount);
 }
 
+/// All-time cumulative tips received by `creator`, defaulting to `0`.
+///
+/// This counter is never decremented — withdrawing does not erase history.
+fn read_total(env: &Env, creator: &Address) -> i128 {
+    env.storage()
+        .persistent()
+        .get(&DataKey::CreatorTotal(creator.clone()))
+        .unwrap_or(0)
+}
+
 #[contract]
 pub struct TipJar;
 
