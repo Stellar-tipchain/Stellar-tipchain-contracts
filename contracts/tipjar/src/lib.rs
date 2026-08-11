@@ -157,7 +157,12 @@ impl TipJar {
             .publish((symbol_short!("tip"), creator), (sender, amount));
     }
 
-    /// TODO: Return cumulative total tips received by `creator`.
+    /// All-time tips received by `creator`, in the token's smallest unit.
+    ///
+    /// Read-only and unauthenticated — anyone may query any creator. Returns
+    /// `0` for an address that has never been tipped, and is unaffected by
+    /// withdrawals, so it always reflects lifetime earnings rather than the
+    /// current withdrawable balance.
     pub fn get_total_tips(env: Env, creator: Address) -> i128 {
         read_total(&env, &creator)
     }
