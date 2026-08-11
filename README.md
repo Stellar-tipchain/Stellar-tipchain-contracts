@@ -229,9 +229,15 @@ stellar contract invoke --id <CONTRACT_ID> -- tip \
 
 ---
 
-### `get_total_tips(creator: Address) → i128` 🔲 TODO
+### `get_total_tips(creator: Address) → i128` ✅ Implemented
 
-Returns the all-time cumulative tips received by `creator`. Read-only, no auth required. Returns `0` for a creator who has never been tipped.
+Returns the all-time cumulative tips received by `creator`. Read-only, no auth required. Returns `0` for a creator who has never been tipped, and is never reduced by a withdrawal.
+
+```rust
+pub fn get_total_tips(env: Env, creator: Address) -> i128 {
+    read_total(&env, &creator)
+}
+```
 
 ```bash
 stellar contract invoke --id <CONTRACT_ID> -- get_total_tips \
