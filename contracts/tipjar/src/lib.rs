@@ -78,6 +78,24 @@ fn write_total(env: &Env, creator: &Address, amount: i128) {
         .set(&DataKey::CreatorTotal(creator.clone()), &amount);
 }
 
+/// Pushes both persistent creator entries further from archival.
+///
+/// Must be called only after the entries exist — extending a missing key
+/// panics. Both counters are bumped together so they always expire together.
+fn extend_creator_ttl(env: &Env, creator: &Address) {
+    let storage = env.storage().persistent();
+    storage.extend_ttl(
+        &DataKey::CreatorBalance(creator.clone()),
+        CREATOR_TTL_THRESHOLD,
+        CREATOR_TTL_EXTEND_TO,
+    );
+    storage.extend_ttl(
+        &DataKey::CreatorTotal(creator.clone()),
+        CREATOR_TTL_THRESHOLD,
+        CREATOR_TTL_EXTEND_TO,
+    );
+}
+
 #[contract]
 pub struct TipJar;
 
