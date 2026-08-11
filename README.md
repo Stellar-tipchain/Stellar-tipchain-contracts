@@ -143,9 +143,25 @@ Soroban has three storage tiers. This contract uses two:
 ```
 Stellar-tipchain-contracts/
 ├── Cargo.toml                  # Workspace manifest (soroban-sdk 22.0.8)
+├── Cargo.lock                  # Committed for reproducible WASM builds
+├── rust-toolchain.toml         # Pinned channel, components and WASM target
+├── Makefile                    # build / test / fmt / clippy / check
 ├── README.md
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
+├── SECURITY.md
+├── LICENSE
+├── .github/
+│   ├── workflows/ci.yml        # build, test and lint jobs
+│   ├── ISSUE_TEMPLATE/
+│   └── pull_request_template.md
+├── docs/
+│   ├── architecture.md         # Escrow design and the tip call path
+│   ├── storage-model.md        # Keys, tiers, defaults
+│   ├── events.md               # Event topics and payloads
+│   ├── testing.md              # Harness, conventions, current suite
+│   ├── dependencies.md         # Why ed25519-dalek is pinned
+│   └── roadmap.md              # Milestones from 30% to 100%
 ├── contracts/
 │   └── tipjar/
 │       ├── Cargo.toml          # cdylib + rlib, soroban-sdk dep
