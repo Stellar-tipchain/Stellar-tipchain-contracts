@@ -3,7 +3,7 @@
 Soroban events carry a **topic** tuple (indexed, used for filtering) and a
 **data** payload.
 
-## `tip`
+## `tip` — implemented
 
 | Field | Value |
 |---|---|
@@ -14,14 +14,15 @@ Emitted at the end of a successful `tip` call, after the token transfer and
 both storage writes have succeeded. If any earlier step panics, the whole
 transaction reverts and no event is published.
 
-## `withdraw`
+## `withdraw` — not yet emitted
 
 | Field | Value |
 |---|---|
 | Topics | `(Symbol("withdraw"), creator: Address)` |
 | Data | `amount: i128` |
 
-Emitted after the escrowed balance has been zeroed and transferred out.
+Planned: emitted after the escrowed balance has been zeroed and transferred
+out. `withdraw` is still unimplemented, so no such event exists on chain yet.
 
 ## Consuming events
 
