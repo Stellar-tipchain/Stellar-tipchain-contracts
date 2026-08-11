@@ -427,6 +427,24 @@ mod tests {
         assert_eq!(tip_event.2, (supporter, 640_i128).into_val(&env));
     }
 
+    #[test]
+    fn test_tip_requires_supporter_authorisation() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &250);
+
+        let auths = env.auths();
+        assert!(
+            auths.iter().any(|(address, _)| address == &supporter),
+            "tip must require the supporter to sign",
+        );
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
