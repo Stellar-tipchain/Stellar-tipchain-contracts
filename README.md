@@ -279,14 +279,16 @@ stellar contract invoke --id <CONTRACT_ID> -- withdraw \
 
 ## Events
 
-> 🔲 Not yet implemented — planned for `tip()` and `withdraw()`.
-
 Soroban events have a **topic** (used for filtering/indexing) and a **data** payload.
 
-| Topic | Data | Emitted by |
-|---|---|---|
-| `("tip", creator: Address)` | `(sender: Address, amount: i128)` | `tip()` |
-| `("withdraw", creator: Address)` | `amount: i128` | `withdraw()` |
+| Topic | Data | Emitted by | Status |
+|---|---|---|---|
+| `("tip", creator: Address)` | `(sender: Address, amount: i128)` | `tip()` | ✅ Emitted |
+| `("withdraw", creator: Address)` | `amount: i128` | `withdraw()` | 🔲 Planned |
+
+The `tip` event is published last, after the transfer and both storage writes,
+so it is only ever observed for a tip that actually moved funds. See
+[docs/events.md](docs/events.md) for consumption examples.
 
 Off-chain consumers (explorers, notification bots, analytics dashboards) can subscribe to these events by filtering on the contract ID and topic.
 
