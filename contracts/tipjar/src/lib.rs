@@ -115,7 +115,11 @@ impl TipJar {
     /// - Transfer tokens sender → contract
     /// - Update CreatorBalance and CreatorTotal
     /// - Emit ("tip", creator) event
-    pub fn tip(_env: Env, _sender: Address, _creator: Address, _amount: i128) {
+    pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
+        // The supporter's wallet must sign: tokens are about to leave it.
+        sender.require_auth();
+
+        let _ = (&env, &creator, amount);
         unimplemented!("tip: not yet implemented")
     }
 
