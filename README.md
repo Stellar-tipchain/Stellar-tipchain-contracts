@@ -7,6 +7,10 @@ A Rust + Soroban smart contract for a Stellar-based tipping application. Support
 
 ## Progress Tracker
 
+**~60% complete.** Tipping works end to end — supporters can fund a creator's
+escrow and anyone can read a creator's lifetime total. Withdrawal and the
+deploy script are what remain.
+
 | # | Feature | Status |
 |---|---|---|
 | 1 | Workspace & crate scaffolding | ✅ Done |
