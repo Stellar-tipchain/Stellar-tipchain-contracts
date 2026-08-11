@@ -15,3 +15,10 @@ debug-assertions = false
 panic = "abort"
 codegen-units = 1
 lto = true
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+panic_in_result_fn = "warn"
