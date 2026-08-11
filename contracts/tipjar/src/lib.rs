@@ -167,12 +167,19 @@ impl TipJar {
         read_total(&env, &creator)
     }
 
-    /// TODO: Transfer creator's escrowed balance to their wallet.
-    /// - Require creator auth
-    /// - Validate balance > 0
-    /// - Transfer tokens contract → creator
-    /// - Reset CreatorBalance to 0
-    /// - Emit ("withdraw", creator) event
+    /// Releases the creator's escrowed balance to their wallet.
+    ///
+    /// Not yet implemented — this is the next milestone. The storage helpers it
+    /// needs ([`read_balance`], [`write_balance`]) already exist, so the
+    /// remaining work is the ordering and the event:
+    ///
+    /// 1. `creator.require_auth()`.
+    /// 2. Read the balance; panic with `"nothing to withdraw"` when it is `0`.
+    /// 3. Zero the balance *before* transferring — reentrancy safety.
+    /// 4. `token::Client::transfer(contract → creator, balance)`.
+    /// 5. Emit `("withdraw", creator)` with the amount.
+    ///
+    /// `CreatorTotal` is deliberately left untouched.
     pub fn withdraw(_env: Env, _creator: Address) {
         unimplemented!("withdraw: not yet implemented")
     }
