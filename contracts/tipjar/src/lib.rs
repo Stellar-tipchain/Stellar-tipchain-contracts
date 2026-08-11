@@ -43,6 +43,17 @@ fn read_token(env: &Env) -> Address {
     }
 }
 
+/// Current withdrawable balance for `creator`, defaulting to `0`.
+///
+/// A creator needs no registration step: an untouched address simply reads as
+/// zero until the first tip creates the entry.
+fn read_balance(env: &Env, creator: &Address) -> i128 {
+    env.storage()
+        .persistent()
+        .get(&DataKey::CreatorBalance(creator.clone()))
+        .unwrap_or(0)
+}
+
 #[contract]
 pub struct TipJar;
 
