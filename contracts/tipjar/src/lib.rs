@@ -11,6 +11,15 @@
 
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Env};
 
+/// Ledgers closed in roughly one day at the ~5 second Stellar ledger cadence.
+const LEDGERS_PER_DAY: u32 = 17_280;
+
+/// Persistent creator entries are bumped when they fall within 30 days of expiry.
+const CREATOR_TTL_THRESHOLD: u32 = LEDGERS_PER_DAY * 30;
+
+/// Bumped entries are extended to live for a further 60 days.
+const CREATOR_TTL_EXTEND_TO: u32 = LEDGERS_PER_DAY * 60;
+
 #[contracttype]
 pub enum DataKey {
     Token,
