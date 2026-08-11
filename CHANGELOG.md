@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased] — ~30% complete
+## [Unreleased] — ~60% complete
 
 ### Done
 - Workspace and crate scaffolding (`Cargo.toml`, `contracts/tipjar/Cargo.toml`)
