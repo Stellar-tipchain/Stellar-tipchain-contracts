@@ -119,7 +119,11 @@ impl TipJar {
         // The supporter's wallet must sign: tokens are about to leave it.
         sender.require_auth();
 
-        let _ = (&env, &creator, amount);
+        if amount <= 0 {
+            panic!("amount must be positive");
+        }
+
+        let _ = (&env, &creator);
         unimplemented!("tip: not yet implemented")
     }
 
