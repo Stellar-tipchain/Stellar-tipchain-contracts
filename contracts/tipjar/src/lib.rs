@@ -347,6 +347,19 @@ mod tests {
         assert_eq!(token.balance(&supporter), SUPPORTER_FUNDS - 400);
     }
 
+    #[test]
+    #[should_panic(expected = "amount must be positive")]
+    fn test_zero_tip_amount_panics() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &0);
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
