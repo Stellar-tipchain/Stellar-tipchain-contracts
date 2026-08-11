@@ -384,6 +384,19 @@ mod tests {
         assert_eq!(client.get_total_tips(&stranger), 0);
     }
 
+    #[test]
+    #[should_panic(expected = "not initialised")]
+    fn test_tip_before_init_panics() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        // Deliberately skip init.
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &100);
+    }
+
     // TODO: test_withdraw       — blocked on withdraw() implementation
     // TODO: test_invalid_tip_amount — blocked on tip() implementation
 }
