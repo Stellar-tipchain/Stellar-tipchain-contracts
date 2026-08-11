@@ -26,9 +26,7 @@
 - `docs/` — architecture, storage model, events, testing, dependencies, roadmap
 
 ### Pending
-- `tip(sender, creator, amount)` — token escrow transfer and balance tracking
-- `get_total_tips(creator)` — read cumulative historical total
 - `withdraw(creator)` — release escrowed balance to creator
-- On-chain events for `tip` and `withdraw`
-- Full unit test suite (`test_tip_and_totals`, `test_withdraw`, `test_invalid_tip_amount`)
+- `("withdraw", creator)` event
+- Withdrawal test coverage, including the zero-before-transfer ordering
 - Testnet deploy script (`scripts/deploy.sh`)
