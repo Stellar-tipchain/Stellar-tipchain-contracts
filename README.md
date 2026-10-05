@@ -70,12 +70,12 @@ Key design properties:
         ↓
 2. init(token_address)
    - Stores the token contract address in instance storage
-   - Can only be called once; panics with "already initialised" on repeat calls
+   - Can only be called once; returns `Error::AlreadyInitialised` (code 1) on repeat calls
    - No auth required — first caller wins
         ↓
 3. tip(sender, creator, amount)                          ← ✅ Implemented
    - sender must sign the transaction (require_auth)
-   - Validates amount > 0, panics with "amount must be positive" otherwise
+   - Validates amount > 0, returns `Error::AmountMustBePositive` (code 2) otherwise
    - Calls token.transfer(sender → contract, amount)
    - Reads CreatorBalance[creator] from persistent storage (default 0)
    - Reads CreatorTotal[creator] from persistent storage (default 0)
@@ -86,7 +86,7 @@ Key design properties:
         ↓
 4. withdraw(creator)                                     ← 🔲 TODO
    - creator must sign the transaction (require_auth)
-   - Reads CreatorBalance[creator]; panics with "nothing to withdraw" if 0
+   - Reads CreatorBalance[creator]; returns `Error::NothingToWithdraw` (code 3) if 0
    - Writes CreatorBalance[creator] = 0  (zeroed before transfer — reentrancy safe)
    - Calls token.transfer(contract → creator, balance)
    - Emits event: topic=("withdraw", creator), data=amount
@@ -182,17 +182,27 @@ The workspace uses a single `[workspace.dependencies]` entry to pin `soroban-sdk
 Stores the token contract address used for all future transfers. Guards against re-initialisation.
 
 ```rust
-pub fn init(env: Env, token: Address) {
+pub fn init(env: Env, token: Address) -> Result<(), Error> {
     if env.storage().instance().has(&DataKey::Token) {
-        panic!("already initialised");
+        return Err(Error::AlreadyInitialised);
     }
     env.storage().instance().set(&DataKey::Token, &token);
+    Ok(())
 }
 ```
 
 ```bash
 stellar contract invoke --id <CONTRACT_ID> -- init --token <TOKEN_ADDRESS>
 ```
+
+#### Errors
+
+| Variant | Code | Raised when |
+|---|---|---|
+| `Error::AlreadyInitialised` | `1` | `init` is called a second time |
+
+The contract returns a typed `Error` enum rather than panicking with a string,
+so callers can match on the numeric code programmatically.
 
 ---
 
@@ -201,22 +211,22 @@ stellar contract invoke --id <CONTRACT_ID> -- init --token <TOKEN_ADDRESS>
 Moves `amount` tokens from `sender` into the contract's escrow and credits the creator's balances.
 
 - `sender.require_auth()` — the sender's wallet must sign
-- Panics `"amount must be positive"` if `amount <= 0`
-- Panics `"not initialised"` if `init` has not been called
+- Returns `Error::AmountMustBePositive` (code `2`) if `amount <= 0`
+- Returns `Error::NotInitialised` (code `4`) if `init` has not been called
 - Calls `token::Client::transfer(sender → contract, amount)`
 - Increments `CreatorBalance[creator]` and `CreatorTotal[creator]` in persistent storage
 - Extends the TTL of both persistent entries
 - Emits `("tip", creator)` event with data `(sender, amount)`
 
 ```rust
-pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
+pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) -> Result<(), Error> {
     sender.require_auth();
 
     if amount <= 0 {
-        panic!("amount must be positive");
+        return Err(Error::AmountMustBePositive);
     }
 
-    let token = read_token(&env);
+    let token = read_token(&env)?;
     token::Client::new(&env, &token).transfer(
         &sender,
         &env.current_contract_address(),
@@ -233,6 +243,8 @@ pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
 
     env.events()
         .publish((symbol_short!("tip"), creator), (sender, amount));
+
+    Ok(())
 }
 ```
 
@@ -242,6 +254,13 @@ stellar contract invoke --id <CONTRACT_ID> -- tip \
   --creator <CREATOR_ADDRESS> \
   --amount 500
 ```
+
+#### Errors
+
+| Variant | Code | Raised when |
+|---|---|---|
+| `Error::AmountMustBePositive` | `2` | `amount <= 0` |
+| `Error::NotInitialised` | `4` | `init` has not been called yet |
 
 ---
 
@@ -268,7 +287,7 @@ Releases the creator's entire escrowed balance to their wallet.
 
 Planned behaviour:
 - `creator.require_auth()` — the creator's wallet must sign
-- Panics `"nothing to withdraw"` if `CreatorBalance[creator]` is `0`
+- Returns `Error::NothingToWithdraw` (code `3`) if `CreatorBalance[creator]` is `0`
 - Zeroes `CreatorBalance[creator]` before the transfer (prevents reentrancy)
 - Calls `token::Client::transfer(contract → creator, balance)`
 - Emits `("withdraw", creator)` event with data `amount`
@@ -278,6 +297,13 @@ Planned behaviour:
 stellar contract invoke --id <CONTRACT_ID> -- withdraw \
   --creator <CREATOR_ADDRESS>
 ```
+
+#### Errors
+
+| Variant | Code | Raised when |
+|---|---|---|
+| `Error::NothingToWithdraw` | `3` | `CreatorBalance[creator]` is `0` |
+| `Error::NotInitialised` | `4` | `init` has not been called yet |
 
 ---
 
@@ -382,7 +408,7 @@ the rest of the design notes are indexed in [docs/](docs/README.md).
 | Test | What it covers | Status |
 |---|---|---|
 | `test_init` | `init()` stores token address without panic | ✅ Passes |
-| `test_init_twice_panics` | Second `init()` call panics with `"already initialised"` | ✅ Passes |
+| `test_init_twice_panics` | Second `init()` call returns `Error::AlreadyInitialised` (code `1`) | ✅ Passes |
 | `test_tip_credits_the_creator_total` | A tip increments the all-time counter | ✅ Passes |
 | `test_tip_credits_the_withdrawable_balance` | A tip increments the escrow balance | ✅ Passes |
 | `test_tips_accumulate_across_calls` | Repeated tips add up instead of overwriting | ✅ Passes |
@@ -390,10 +416,10 @@ the rest of the design notes are indexed in [docs/](docs/README.md).
 | `test_creator_balances_are_isolated` | One creator's tips never reach another | ✅ Passes |
 | `test_tipped_funds_land_in_contract_escrow` | Tokens sit with the contract, not the creator | ✅ Passes |
 | `test_tip_debits_the_supporter` | The sender pays exactly the tip amount | ✅ Passes |
-| `test_zero_tip_amount_panics` | `amount == 0` panics with `"amount must be positive"` | ✅ Passes |
-| `test_negative_tip_amount_panics` | `amount < 0` panics with `"amount must be positive"` | ✅ Passes |
+| `test_zero_tip_amount_panics` | `amount == 0` returns `Error::AmountMustBePositive` (code `2`) | ✅ Passes |
+| `test_negative_tip_amount_panics` | `amount < 0` returns `Error::AmountMustBePositive` (code `2`) | ✅ Passes |
 | `test_get_total_tips_is_zero_for_unknown_creator` | Untouched addresses read as `0` | ✅ Passes |
-| `test_tip_before_init_panics` | Tipping an unconfigured jar panics `"not initialised"` | ✅ Passes |
+| `test_tip_before_init_panics` | Tipping an unconfigured jar returns `Error::NotInitialised` (code `4`) | ✅ Passes |
 | `test_tip_emits_a_tip_event` | Event topics and payload match the spec | ✅ Passes |
 | `test_tip_requires_supporter_authorisation` | `require_auth` is recorded for the sender | ✅ Passes |
 | `test_withdraw_is_not_implemented_yet` | `withdraw` fails loudly while unimplemented | ✅ Passes |
