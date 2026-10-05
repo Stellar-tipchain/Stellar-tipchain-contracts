@@ -9,7 +9,17 @@
 //! [`TipJar::withdraw`] to release their balance. There is no admin role — once
 //! [`TipJar::init`] has stored the token address, the contract is autonomous.
 
-use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, token, Address, Env};
+use soroban_sdk::{contract, contracterror, contractimpl, contracttype, symbol_short, token, Address, Env};
+
+#[contracterror]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[repr(u32)]
+pub enum Error {
+    AlreadyInitialised = 1,
+    NotInitialised = 2,
+    AmountMustBePositive = 3,
+    SelfTipNotAllowed = 4,
+}
 
 /// Ledgers closed in roughly one day at the ~5 second Stellar ledger cadence.
 const LEDGERS_PER_DAY: u32 = 17_280;
@@ -36,10 +46,10 @@ fn is_initialised(env: &Env) -> bool {
 ///
 /// Panics with `"not initialised"` when `init` has never been called, so a
 /// mis-ordered deployment fails loudly instead of transferring nothing.
-fn read_token(env: &Env) -> Address {
+fn read_token(env: &Env) -> Result<Address, Error> {
     match env.storage().instance().get(&DataKey::Token) {
-        Some(token) => token,
-        None => panic!("not initialised"),
+        Some(token) => Ok(token),
+        None => Err(Error::NotInitialised),
     }
 }
 
@@ -102,11 +112,12 @@ pub struct TipJar;
 #[contractimpl]
 impl TipJar {
     /// One-time initialisation: store the token contract address.
-    pub fn init(env: Env, token: Address) {
+    pub fn init(env: Env, token: Address) -> Result<(), Error> {
         if is_initialised(&env) {
-            panic!("already initialised");
+            return Err(Error::AlreadyInitialised);
         }
         env.storage().instance().set(&DataKey::Token, &token);
+        Ok(())
     }
 
     /// Tips `creator` with `amount` tokens, held in escrow until withdrawal.
@@ -125,15 +136,19 @@ impl TipJar {
     ///
     /// `sender` must sign the transaction. No authorisation is required from
     /// `creator` — anyone may be tipped without opting in.
-    pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) {
+    pub fn tip(env: Env, sender: Address, creator: Address, amount: i128) -> Result<(), Error> {
         // The supporter's wallet must sign: tokens are about to leave it.
         sender.require_auth();
 
         if amount <= 0 {
-            panic!("amount must be positive");
+            return Err(Error::AmountMustBePositive);
         }
 
-        let token = read_token(&env);
+        if sender == creator {
+            return Err(Error::SelfTipNotAllowed);
+        }
+
+        let token = read_token(&env)?;
 
         // Move the tokens into the contract's own account — the escrow.
         token::Client::new(&env, &token).transfer(
@@ -155,6 +170,8 @@ impl TipJar {
 
         env.events()
             .publish((symbol_short!("tip"), creator), (sender, amount));
+
+        Ok(())
     }
 
     /// All-time tips received by `creator`, in the token's smallest unit.
@@ -230,12 +247,14 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "already initialised")]
     fn test_init_twice_panics() {
         let (env, contract_id, token_id, _admin) = setup();
         let client = TipJarClient::new(&env, &contract_id);
         client.init(&token_id);
-        client.init(&token_id); // must panic
+        assert_eq!(
+            client.try_init(&token_id),
+            Err(Ok(Error::AlreadyInitialised))
+        );
     }
 
     #[test]
@@ -348,7 +367,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "amount must be positive")]
     fn test_zero_tip_amount_panics() {
         let (env, contract_id, token_id, admin) = setup();
         let client = TipJarClient::new(&env, &contract_id);
@@ -357,11 +375,13 @@ mod tests {
         let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
         let creator = Address::generate(&env);
 
-        client.tip(&supporter, &creator, &0);
+        assert_eq!(
+            client.try_tip(&supporter, &creator, &0),
+            Err(Ok(Error::AmountMustBePositive))
+        );
     }
 
     #[test]
-    #[should_panic(expected = "amount must be positive")]
     fn test_negative_tip_amount_panics() {
         let (env, contract_id, token_id, admin) = setup();
         let client = TipJarClient::new(&env, &contract_id);
@@ -370,7 +390,24 @@ mod tests {
         let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
         let creator = Address::generate(&env);
 
-        client.tip(&supporter, &creator, &-100);
+        assert_eq!(
+            client.try_tip(&supporter, &creator, &-100),
+            Err(Ok(Error::AmountMustBePositive))
+        );
+    }
+
+    #[test]
+    fn test_self_tip_is_rejected() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let creator = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+
+        assert_eq!(
+            client.try_tip(&creator, &creator, &100),
+            Err(Ok(Error::SelfTipNotAllowed))
+        );
     }
 
     #[test]
@@ -385,7 +422,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "not initialised")]
     fn test_tip_before_init_panics() {
         let (env, contract_id, token_id, admin) = setup();
         let client = TipJarClient::new(&env, &contract_id);
@@ -394,7 +430,10 @@ mod tests {
         let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
         let creator = Address::generate(&env);
 
-        client.tip(&supporter, &creator, &100);
+        assert_eq!(
+            client.try_tip(&supporter, &creator, &100),
+            Err(Ok(Error::NotInitialised))
+        );
     }
 
     #[test]
