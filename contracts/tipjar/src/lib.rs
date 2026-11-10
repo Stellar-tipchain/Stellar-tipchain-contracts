@@ -21,14 +21,17 @@ pub enum Error {
     SelfTipNotAllowed = 4,
 }
 
-/// Ledgers closed in roughly one day at the ~5 second Stellar ledger cadence.
-const LEDGERS_PER_DAY: u32 = 17_280;
+/// Minimum ledger threshold before TTL is extended (~1 day at 5s/ledger).
+const LEDGERS_MIN_TTL: u32 = 17_280;
+
+/// Target ledger lifetime extended upon bump (~30 days at 5s/ledger).
+const LEDGERS_MAX_TTL: u32 = 518_400;
 
 /// Persistent creator entries are bumped when they fall within 30 days of expiry.
-const CREATOR_TTL_THRESHOLD: u32 = LEDGERS_PER_DAY * 30;
+const CREATOR_TTL_THRESHOLD: u32 = LEDGERS_MIN_TTL;
 
-/// Bumped entries are extended to live for a further 60 days.
-const CREATOR_TTL_EXTEND_TO: u32 = LEDGERS_PER_DAY * 60;
+/// Bumped entries are extended to live for a further 30 days.
+const CREATOR_TTL_EXTEND_TO: u32 = LEDGERS_MAX_TTL;
 
 #[contracttype]
 pub enum DataKey {
@@ -117,6 +120,9 @@ impl TipJar {
             return Err(Error::AlreadyInitialised);
         }
         env.storage().instance().set(&DataKey::Token, &token);
+        env.storage()
+            .instance()
+            .extend_ttl(LEDGERS_MIN_TTL, LEDGERS_MAX_TTL);
         Ok(())
     }
 
@@ -498,6 +504,20 @@ mod tests {
         // Pins the current 60% state: withdraw must fail loudly, never silently
         // succeed while funds stay in escrow.
         client.withdraw(&creator);
+    }
+
+    #[test]
+    fn test_ttl_extension_does_not_panic() {
+        let (env, contract_id, token_id, admin) = setup();
+        let client = TipJarClient::new(&env, &contract_id);
+        client.init(&token_id);
+
+        let supporter = funded_supporter(&env, &token_id, &admin, SUPPORTER_FUNDS);
+        let creator = Address::generate(&env);
+
+        client.tip(&supporter, &creator, &1_000);
+
+        assert_eq!(client.get_total_tips(&creator), 1_000);
     }
 
     // TODO: test_withdraw — replace test_withdraw_is_not_implemented_yet once

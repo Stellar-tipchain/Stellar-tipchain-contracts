@@ -12,11 +12,10 @@
 deployed_contract_id.txt
 
 # Environment files
-.env
-.env.local
 
 # Editor / OS noise
-.vscode/
 .idea/
 .DS_Store
 *.swp
+config.bat
+node_modules
